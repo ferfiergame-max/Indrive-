@@ -220,7 +220,10 @@ const phoneEmail = key => `p${key}@${PHONE_EMAIL_DOMAIN}`;
 
 async function dbRequest(path, method = 'GET', body){
   const hasBody = body !== undefined;
-  const res = await fetch(`${DB}/${path}.json`, {
+  let token = '';
+  try{ if(auth && auth.currentUser) token = await auth.currentUser.getIdToken(); }catch(e){}
+  const q = token ? `?auth=${encodeURIComponent(token)}` : '';
+  const res = await fetch(`${DB}/${path}.json${q}`, {
     method,
     headers: hasBody ? {'Content-Type':'application/json'} : undefined,
     body: hasBody ? JSON.stringify(body) : undefined
