@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تطبيق النقل</title>
+<style>
+:root{--bg:#fff6ef;--card:#ffffff;--ink:#1f1f1f;--muted:#7a6f66;--accent:#ff6a13;--accent-ink:#ffffff;--ok:#0f9d58;--bad:#e11d48;--line:#f1e4da;--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 22px rgba(255,106,19,.10);--r:18px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140d09;--card:#1f1611;--ink:#f5ece6;--muted:#b8a89c;--line:#3a2a20;--shadow:0 8px 22px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Tahoma,"Noto Sans Arabic",Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+header{background:linear-gradient(135deg,#ff7a1a,#ff5210);color:#fff;padding:16px;position:sticky;top:0;z-index:5;box-shadow:0 4px 14px rgba(255,80,16,.35)}
+.hrow{max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-weight:900;font-size:1.3rem;letter-spacing:.3px}
+main{max-width:560px;margin:0 auto;padding:16px 14px 70px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px;border:1px solid var(--line);animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+label{display:block;font-size:.9rem;color:var(--muted);margin:12px 0 6px}
+input,.sel{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);font:inherit;background:var(--card);color:var(--ink);outline:none}
+input:focus,.sel:focus{border-color:var(--accent)}
+.row{display:flex;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.muted{color:var(--muted);font-size:.9rem}
+.mapbox{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.pt{display:flex;align-items:center;gap:10px;background:#fff8f2;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.pdot{width:12px;height:12px;border-radius:50%;flex:none;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.pl{flex:1;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mlink{color:#fff;background:#2563eb;text-decoration:none;font-weight:700;font-size:.85rem;padding:8px 12px;border-radius:10px;white-space:nowrap}
+.dist{font-weight:800;color:var(--accent);margin-top:2px;text-align:center}
+.svcs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.svc{display:flex;flex-direction:column;align-items:center;gap:4px;border:2px solid var(--line);border-radius:16px;padding:12px 8px;cursor:pointer;background:var(--card);color:var(--ink);font:inherit}
+.svc.on{border-color:var(--accent);background:#fff1e6}
+.svc .ico{font-size:2rem}
+.svc .t{font-weight:800}
+.gbtns{display:flex;gap:10px;margin-top:6px}
+.gbtn{flex:1;padding:12px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);cursor:pointer;font:inherit;font-weight:700}
+.gbtn.on{border-color:var(--accent);background:#fff1e6}
+.tabs2{display:flex;gap:8px;margin:14px 0 4px}
+.tab2{flex:1;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.tab2.on{border-color:var(--accent);background:#fff1e6}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);margin:14px 0 4px;font-size:.9rem}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.step{width:52px;height:52px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.4rem;font-weight:700;cursor:pointer}
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.amount{font-size:2rem;font-weight:900;color:var(--accent)}
+.amount small{font-size:.9rem;color:var(--muted);font-weight:600}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer;margin-top:14px;display:block;text-align:center;text-decoration:none;box-shadow:0 6px 16px rgba(255,106,19,.3)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);box-shadow:none}
+.btn.danger{background:var(--bad);color:#fff;box-shadow:none}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:active{transform:scale(.98)}
+.link{color:var(--muted);background:none;border:none;font:inherit;cursor:pointer;padding:6px;text-decoration:underline}
+.status{display:inline-block;padding:6px 12px;border-radius:999px;font-size:.85rem;font-weight:700;background:#fff3c4;color:#7a5600}
+.status.accepted,.status.done{background:#d7f5e5;color:#0a6b3c}
+.status.cancelled{background:#fde2e7;color:#9f1239}
+.route{display:flex;flex-direction:column;gap:6px}
+.route div{display:flex;align-items:center;gap:10px;font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);flex:none}
+.dot.end{background:var(--bad)}
+.offer{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px}
+.offer .name{font-weight:800}
+.offer .meta{color:var(--muted);font-size:.85rem;margin-top:3px}
+.oprice{font-weight:900;font-size:1.2rem;margin-top:4px;color:var(--accent)}
+.acc,.send{padding:10px 16px;min-height:44px;border:none;border-radius:12px;background:var(--ok);color:#fff;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}
+.empty{color:var(--muted);text-align:center;padding:22px 8px}
+.pulse{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-left:6px;animation:p 1.2s infinite}
+@keyframes p{0%{opacity:1}50%{opacity:.2}100%{opacity:1}}
+.err{color:var(--bad);font-size:.9rem;margin-top:10px;min-height:18px}
+.eta{display:inline-block;background:#fff1e6;color:#c2410c;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:700;margin-top:8px}
+.chat{max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:8px 2px;margin-top:8px}
+.bubble{max-width:78%;padding:9px 13px;border-radius:16px;font-size:.95rem;word-wrap:break-word}
+.bubble.me{align-self:flex-start;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.bubble.them{align-self:flex-end;background:#f1f5f9;color:#111;border-bottom-left-radius:4px}
+.chatbar{display:flex;gap:8px;margin-top:10px}
+.chatbar input{flex:1}
+.reqitem{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.reqtop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.badge{background:#e0f2fe;color:#0369a1;font-weight:800;font-size:.85rem;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.badge.near{background:#d7f5e5;color:#0a6b3c}
+#toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,140px);background:#1f1f1f;color:#fff;padding:12px 18px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);font-weight:700;transition:transform .3s ease;z-index:9999;max-width:90vw;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (max-width:360px){.svcs,.grid2{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="brand">🚕 تطبيق النقل</div>
+    <button class="link" id="logoutBtn" style="color:#fff;display:none">خروج</button>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+/* ===== الإعداد ===== */
+const DB = 'https://indrive-passenger-default-rtdb.firebaseio.com';
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyCbzEcIV3VDKNUUCijrBEiJqAiJ2o3e0CU',
+  authDomain: 'indrive-passenger.firebaseapp.com',
+  databaseURL: 'https://indrive-passenger-default-rtdb.firebaseio.com',
+  projectId: 'indrive-passenger',
+  appId: '1:693333768943:web:76c22085f688754d9ff91a'
+};
+const PHONE_EMAIL_DOMAIN = 'indrive-passenger.app';   // بريد داخلي لحسابات الهاتف
+const CURRENCY = 'DH';
+const MIN_PRICE = 5, MAX_PRICE = 500, STEP = 5;
+const POLL_MS = 3000;
+const LOC_MS = 5000;
+const PICKUP_RADIUS_KM = 5;
+
+const SERVICES = [
+  {id: 'سيارة',       icon: '🚗', label: 'سيارة'},
+  {id: 'دراجة نارية', icon: '🛵', label: 'دراجة نارية'}
+];
+const CITIES = [
+  {name:'الدار البيضاء', lat:33.5731, lng:-7.5898},
+  {name:'الرباط',        lat:34.0209, lng:-6.8416},
+  {name:'فاس',           lat:34.0181, lng:-5.0078},
+  {name:'مراكش',         lat:31.6295, lng:-7.9811},
+  {name:'طنجة',          lat:35.7595, lng:-5.8340},
+  {name:'أكادير',        lat:30.4278, lng:-9.5981},
+  {name:'مكناس',         lat:33.8935, lng:-5.5473},
+  {name:'وجدة',          lat:34.6814, lng:-1.9086},
+  {name:'القنيطرة',      lat:34.2610, lng:-6.5802},
+  {name:'تطوان',         lat:35.5889, lng:-5.3626},
+  {name:'سلا',           lat:34.0531, lng:-6.7985},
+  {name:'تمارة',         lat:33.9270, lng:-6.9060},
+  {name:'الصخيرات',      lat:33.8500, lng:-7.0300},
+  {name:'المحمدية',      lat:33.6861, lng:-7.3830},
+  {name:'برشيد',         lat:33.2650, lng:-7.5870},
+  {name:'الجديدة',       lat:33.2316, lng:-8.5007},
+  {name:'سطات',          lat:33.0010, lng:-7.6167},
+  {name:'بن أحمد',       lat:33.3450, lng:-7.5300},
+  {name:'خريبكة',        lat:32.8811, lng:-6.9063},
+  {name:'بني ملال',      lat:32.3373, lng:-6.3498},
+  {name:'الفقيه بن صالح',lat:32.5133, lng:-6.6916},
+  {name:'أزيلال',        lat:32.0000, lng:-6.5667},
+  {name:'خنيفرة',        lat:32.9347, lng:-5.6697},
+  {name:'ميدلت',         lat:32.6833, lng:-4.7333},
+  {name:'الخميسات',      lat:33.8229, lng:-6.0656},
+  {name:'تازة',          lat:34.2110, lng:-4.0100},
+  {name:'إفران',         lat:33.5300, lng:-5.1100},
+  {name:'أزرو',          lat:33.4333, lng:-5.2167},
+  {name:'سيدي قاسم',     lat:34.2200, lng:-5.7100},
+  {name:'سيدي سليمان',   lat:34.2600, lng:-5.9300},
+  {name:'القصر الكبير',  lat:35.0022, lng:-5.9053},
+  {name:'العرائش',       lat:35.1933, lng:-6.1561},
+  {name:'شفشاون',        lat:35.1688, lng:-5.2636},
+  {name:'الحسيمة',       lat:35.2517, lng:-3.9372},
+  {name:'الناظور',       lat:35.1681, lng:-2.9335},
+  {name:'بركان',         lat:34.9220, lng:-2.3210},
+  {name:'تاوريرت',       lat:34.4106, lng:-2.8950},
+  {name:'آسفي',          lat:32.2994, lng:-9.2372},
+  {name:'الصويرة',       lat:31.5085, lng:-9.7595},
+  {name:'اليوسفية',      lat:32.2500, lng:-8.5300},
+  {name:'سيدي بنور',     lat:32.6500, lng:-8.4300},
+  {name:'إنزكان',        lat:30.3600, lng:-9.5400},
+  {name:'أيت ملول',      lat:30.3400, lng:-9.5000},
+  {name:'تارودانت',      lat:30.4704, lng:-8.8775},
+  {name:'تيزنيت',        lat:29.6974, lng:-9.7316},
+  {name:'سيدي إفني',     lat:29.3797, lng:-10.1731},
+  {name:'كلميم',         lat:28.9870, lng:-10.0574},
+  {name:'طانطان',        lat:28.4378, lng:-11.1031},
+  {name:'العيون',        lat:27.1253, lng:-13.1625},
+  {name:'بوجدور',        lat:26.1250, lng:-14.4833},
+  {name:'الداخلة',       lat:23.6848, lng:-15.9579},
+  {name:'الراشيدية',     lat:31.9314, lng:-4.4244},
+  {name:'ورزازات',       lat:30.9335, lng:-6.9370},
+  {name:'تنغير',         lat:31.5100, lng:-5.5300},
+  {name:'زاكورة',        lat:30.3300, lng:-5.8400}
+];
+
+/* ===== تهيئة Firebase ===== */
+let auth = null;
+try{
+  firebase.initializeApp(FIREBASE_CONFIG);
+  auth = firebase.auth();
+}catch(e){ auth = null; }
+
+/* ===== أدوات عامة ===== */
+const app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const STATUS_TXT = {searching:'جارٍ البحث عن سائق', accepted:'تم قبول الرحلة', arrived:'السائق وصل إليك', ongoing:'الرحلة جارية', cancelled:'ملغاة', done:'منتهية'};
+const ACTIVE_STATES = ['accepted', 'arrived', 'ongoing'];
+const NEXT = {
+  accepted: {to: 'arrived', label: 'وصلت إلى نقطة الانطلاق'},
+  arrived:  {to: 'ongoing', label: 'بدأت الرحلة'},
+  ongoing:  {to: 'done',    label: 'إنهاء الرحلة'}
+};
+const genderIcon = g => g === 'female' ? '👩' : g === 'male' ? '👨' : '';
+const svcIcon = id => (SERVICES.find(s => s.id === id) || SERVICES[0]).icon;
+
+let pollTimer = null;
+let lastLocPush = 0, lastDriverPos = null, draftPrice = 50, draftService = 'سيارة';
+let lastOfferCount = 0, lastOpenCount = -1, driverNotifiedRide = null;
+let chatRideId = null, chatRole = null, chatMsgCount = -1;
+let showAllCity = false;
+
+function stopAll(){ if(pollTimer){ clearInterval(pollTimer); pollTimer = null; } }
+function toast(msg){
+  let t = document.getElementById('toast');
+  if(!t){ t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(() => t.classList.remove('show'), 3000);
+}
+function buzz(){ try{ if(navigator.vibrate) navigator.vibrate([200, 100, 200]); }catch(e){} }
+function getProfile(){ try{ return JSON.parse(localStorage.getItem('profile') || 'null'); }catch(e){ return null; } }
+function setProfile(p){ try{ localStorage.setItem('profile', JSON.stringify(p)); }catch(e){} }
+function saveProfileField(k, v){ const p = getProfile() || {}; p[k] = v; setProfile(p); }
+function savedRideId(){ try{ return localStorage.getItem('activeRide') || ''; }catch(e){ return ''; } }
+function saveRideId(id){ try{ id ? localStorage.setItem('activeRide', id) : localStorage.removeItem('activeRide'); }catch(e){} }
+const phoneKey = p => String(p).replace(/\D/g, '');
+const phoneEmail = key => `p${key}@${PHONE_EMAIL_DOMAIN}`;
+
+async function dbRequest(path, method = 'GET', body){
+  const hasBody = body !== undefined;
+  const res = await fetch(`${DB}/${path}.json`, {
+    method,
+    headers: hasBody ? {'Content-Type':'application/json'} : undefined,
+    body: hasBody ? JSON.stringify(body) : undefined
+  });
+  if(!res.ok) throw new Error('DB ' + res.status);
+  return res.json();
+}
+
+/* ===== الموقع والمسافة ===== */
+function getPos(){
+  return new Promise((resolve, reject) => {
+    if(!navigator.geolocation) return reject(new Error('no-geo'));
+    navigator.geolocation.getCurrentPosition(
+      p => resolve({lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy)}),
+      reject, {enableHighAccuracy: true, timeout: 10000, maximumAge: 15000});
+  });
+}
+/* قراءة دقيقة: تنتظر أفضل قراءة حتى دقة 30 م أو انتهاء المهلة */
+function getPosPrecise(timeoutMs = 12000){
+  return new Promise((resolve, reject) => {
+    if(!navigator.geolocation) return reject(new Error('no-geo'));
+    let id = null, timer = null, best = null;
+    const cleanup = () => { if(id !== null) navigator.geolocation.clearWatch(id); clearTimeout(timer); };
+    const finish = () => { cleanup(); best ? resolve(best) : reject(new Error('no-fix')); };
+    id = navigator.geolocation.watchPosition(p => {
+      const cur = {lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy)};
+      if(!best || cur.acc < best.acc) best = cur;
+      if(best.acc <= 30) finish();
+    }, err => { if(!best){ cleanup(); reject(err); } },
+    {enableHighAccuracy: true, maximumAge: 0, timeout: timeoutMs});
+    timer = setTimeout(finish, timeoutMs);
+  });
+}
+function distKm(a, b){
+  const R = 6371, t = d => d * Math.PI / 180;
+  const dLat = t(b.lat - a.lat), dLng = t(b.lng - a.lng);
+  const x = Math.sin(dLat/2)**2 + Math.cos(t(a.lat)) * Math.cos(t(b.lat)) * Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+/* المسافة بالمتر إن كانت أقل من كيلومتر، وإلا بالكيلومتر */
+function fmtDist(km){ return km < 1 ? Math.round(km * 1000) + ' م' : km.toFixed(1) + ' كم'; }
+const nearestCity = pos => CITIES.reduce((best, c) => distKm(pos, c) < distKm(pos, best) ? c : best, CITIES[0]);
+const cityByName = n => CITIES.find(c => c.name === n);
+const cityOptions = sel => CITIES.map(c => `<option value="${esc(c.name)}" ${c.name === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+const mapsUrl = (lat, lng) => `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+const navLink = r => {
+  const d = r.passengerLoc || r.pickup;
+  return d ? `https://www.google.com/maps/dir/?api=1&destination=${d.lat},${d.lng}` : '#';
+};
+
+/* ===== الخريطة: تفتح خريطة الهاتف نفسها ===== */
+function drawMap(el, points){
+  if(!el) return;
+  const pts = points.filter(Boolean);
+  if(!pts.length){ el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="mapbox">
+      ${pts.map(p => `
+        <div class="pt">
+          <span class="pdot" style="background:${p.color}"></span>
+          <span class="pl">${esc(p.label)}</span>
+          <a class="mlink" target="_blank" rel="noopener" href="${mapsUrl(p.lat, p.lng)}">افتح في الخريطة</a>
+        </div>`).join('')}
+      ${pts.length === 2 ? `<div class="dist">📏 المسافة بينكما: ${fmtDist(distKm(pts[0], pts[1]))}</div>` : ''}
+    </div>`;
+}
+
+/* ===== الدردشة ===== */
+function chatCardHTML(){
+  return `
+    <div class="card" id="chatCard">
+      <b>💬 الدردشة</b>
+      <div class="chat" id="chatMsgs"></div>
+      <form class="chatbar" id="chatForm" autocomplete="off">
+        <input id="chatIn" maxlength="300" placeholder="اكتب رسالة…">
+        <button class="send" type="submit">إرسال</button>
+      </form>
+    </div>`;
+}
+function bindChatForm(){
+  const f = document.getElementById('chatForm');
+  if(!f) return;
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const inp = document.getElementById('chatIn');
+    const text = inp.value.trim();
+    if(!text || !chatRideId) return;
+    inp.value = '';
+    try{
+      await dbRequest('rides/' + chatRideId + '/messages', 'POST', {from: chatRole, text, t: Date.now()});
+    }catch(err){
+      toast('تعذّر إرسال الرسالة');
+      inp.value = text;
+    }
+  };
+}
+function renderChat(ride){
+  const box = document.getElementById('chatMsgs');
+  if(!box) return;
+  const msgs = ride.messages ? Object.values(ride.messages).sort((a, b) => (a.t || 0) - (b.t || 0)) : [];
+  if(msgs.length === chatMsgCount) return;
+  if(chatMsgCount >= 0 && msgs.length > chatMsgCount){
+    const last = msgs[msgs.length - 1];
+    if(last.from !== chatRole){ toast('💬 رسالة جديدة'); buzz(); }
+  }
+  box.innerHTML = msgs.length
+    ? msgs.slice(-80).map(m => `<div class="bubble ${m.from === chatRole ? 'me' : 'them'}">${esc(m.text)}</div>`).join('')
+    : '<div class="muted" style="text-align:center;padding:10px">ابدأ المحادثة 👋</div>';
+  box.scrollTop = box.scrollHeight;
+  chatMsgCount = msgs.length;
+}
+
+/* ===== حفظ المستخدم بعد أي تسجيل دخول ===== */
+async function storeUser(uid, base){
+  const existing = await dbRequest('users/' + uid).catch(() => null);
+  const merged = {
+    ...(existing || {}),
+    ...base,
+    uid,
+    name: base.name || (existing && existing.name) || 'مستخدم',
+    createdAt: (existing && existing.createdAt) || base.createdAt || Date.now()
+  };
+  await dbRequest('users/' + uid, 'PUT', merged);
+  setProfile({
+    uid, name: merged.name, email: merged.email || '',
+    phone: merged.phone || null, gender: merged.gender || null, role: merged.role || null,
+    city: merged.city, vehicle: merged.vehicle, seats: merged.seats, car: merged.car
+  });
+}
+async function saveGoogleUser(u){
+  await storeUser(u.uid, {name: u.displayName || null, email: u.email || '', createdAt: Date.now()});
+}
+async function handleRedirect(){
+  if(!auth) return;
+  try{
+    const res = await auth.getRedirectResult();
+    if(res && res.user) await saveGoogleUser(res.user);
+  }catch(e){
+    toast('تعذّر تسجيل الدخول، حاول مرة أخرى');
+  }
+}
+function logout(){
+  stopAll();
+  try{ if(auth) auth.signOut(); }catch(e){}
+  try{ localStorage.removeItem('profile'); localStorage.removeItem('activeRide'); }catch(e){}
+  location.hash = '#/start';
+  route();
+}
+
+/* ===== شاشة الدخول: Gmail أو الهاتف وكلمة المرور ===== */
+function authErrorText(code){
+  const map = {
+    'auth/invalid-credential': 'الرقم أو كلمة المرور غير صحيحة',
+    'auth/wrong-password': 'الرقم أو كلمة المرور غير صحيحة',
+    'auth/user-not-found': 'الرقم أو كلمة المرور غير صحيحة',
+    'auth/email-already-in-use': 'هذا الرقم مسجل مسبقًا، سجّل الدخول',
+    'auth/weak-password': 'كلمة المرور ضعيفة، استخدم 6 أحرف على الأقل',
+    'auth/operation-not-allowed': 'طريقة الدخول بالهاتف غير مفعّلة في Firebase',
+    'auth/too-many-requests': 'محاولات كثيرة، انتظر قليلًا ثم حاول مرة أخرى'
+  };
+  return map[code] || 'تعذّر تسجيل الدخول، تحقق من الاتصال';
+}
+
+function showOnboarding(){
+  stopAll();
+  let mode = 'login';
+  app.innerHTML = `
+    <div class="card">
+      <div style="text-align:center">
+        <div style="font-size:3rem">🚕</div>
+        <h2 style="margin:8px 0 6px">مرحبًا بك</h2>
+        <div class="muted">سجّل الدخول للمتابعة</div>
+      </div>
+      <button class="btn" id="gBtn">🔐 الدخول بحساب Gmail</button>
+      <div class="or">أو</div>
+      <div class="tabs2">
+        <button class="tab2 on" data-m="login">تسجيل الدخول</button>
+        <button class="tab2" data-m="signup">حساب جديد</button>
+      </div>
+      <div id="nameWrap" style="display:none">
+        <label for="pname">الاسم الشخصي</label>
+        <input id="pname" autocomplete="name" placeholder="مثال: يوسف">
+      </div>
+      <label for="pphone">رقم الهاتف</label>
+      <input id="pphone" inputmode="tel" autocomplete="tel" placeholder="06XXXXXXXX">
+      <label for="ppass">كلمة المرور</label>
+      <input id="ppass" type="password" autocomplete="current-password" placeholder="6 أحرف على الأقل">
+      <div class="err" id="err"></div>
+      <button class="btn" id="phoneBtn">دخول</button>
+    </div>`;
+
+  const err = () => document.getElementById('err');
+
+  document.querySelectorAll('.tab2').forEach(b => b.onclick = () => {
+    mode = b.dataset.m;
+    document.querySelectorAll('.tab2').forEach(x => x.classList.toggle('on', x === b));
+    document.getElementById('nameWrap').style.display = mode === 'signup' ? '' : 'none';
+    document.getElementById('ppass').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+    document.getElementById('phoneBtn').textContent = mode === 'signup' ? 'إنشاء الحساب' : 'دخول';
+    err().textContent = '';
+  });
+
+  document.getElementById('gBtn').onclick = async () => {
+    const btn = document.getElementById('gBtn');
+    if(!auth){ err().textContent = 'خدمة تسجيل الدخول غير متاحة، تحقق من الاتصال'; return; }
+    btn.disabled = true; btn.textContent = 'جارٍ التحويل إلى Google…';
+    try{
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({prompt: 'select_account'});
+      await auth.signInWithRedirect(provider);
+    }catch(e){
+      err().textContent = authErrorText(e.code);
+      btn.disabled = false; btn.textContent = '🔐 الدخول بحساب Gmail';
+    }
+  };
+
+  document.getElementById('phoneBtn').onclick = async () => {
+    const btn = document.getElementById('phoneBtn');
+    const name = document.getElementById('pname').value.trim();
+    const phone = document.getElementById('pphone').value.trim().replace(/[\s-]/g, '');
+    const pass = document.getElementById('ppass').value;
+    if(!auth){ err().textContent = 'خدمة تسجيل الدخول غير متاحة، تحقق من الاتصال'; return; }
+    if(!/^\+?\d{9,15}$/.test(phone)){ err().textContent = 'رقم الهاتف غير صحيح'; return; }
+    if(pass.length < 6){ err().textContent = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'; return; }
+    if(mode === 'signup' && name.length < 2){ err().textContent = 'يرجى كتابة اسمك الشخصي'; return; }
+
+    const key = phoneKey(phone);
+    btn.disabled = true; err().textContent = '';
+    try{
+      if(mode === 'signup'){
+        // كل رقم هاتف يرتبط بحساب واحد فقط
+        const owner = await dbRequest('phones/' + key);
+        if(owner){ err().textContent = 'هذا الرقم مسجل مسبقًا، سجّل الدخول'; btn.disabled = false; return; }
+        const cred = await auth.createUserWithEmailAndPassword(phoneEmail(key), pass);
+        await dbRequest('phones/' + key, 'PUT', cred.user.uid);
+        await storeUser(cred.user.uid, {name, phone, createdAt: Date.now()});
+      }else{
+        const cred = await auth.signInWithEmailAndPassword(phoneEmail(key), pass);
+        await storeUser(cred.user.uid, {});
+      }
+      location.hash = '#/';
+      route();
+    }catch(e){
+      err().textContent = authErrorText(e.code);
+      btn.disabled = false;
+    }
+  };
+}
+
+/* ===== استكمال الملف: الجنس ورقم الهاتف لحسابات Gmail ===== */
+function showComplete(){
+  stopAll();
+  const p = getProfile() || {};
+  let gender = p.gender || null;
+  app.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 6px">أكمل ملفك 👋</h2>
+      <div class="muted">مرحبًا ${esc(p.name || '')}، نحتاج رقم هاتفك والجنس مرة واحدة</div>
+      <label for="pphone">رقم الهاتف</label>
+      <input id="pphone" inputmode="tel" autocomplete="tel" placeholder="06XXXXXXXX" value="${esc(p.phone || '')}">
+      <label>الجنس</label>
+      <div class="gbtns">
+        <button type="button" class="gbtn ${gender === 'male' ? 'on' : ''}" data-g="male">👨 رجل</button>
+        <button type="button" class="gbtn ${gender === 'female' ? 'on' : ''}" data-g="female">👩 امرأة</button>
+      </div>
+      <div class="err" id="err"></div>
+      <button class="btn" id="saveComplete">حفظ والمتابعة</button>
+    </div>`;
+
+  document.querySelectorAll('.gbtn').forEach(b => b.onclick = () => {
+    gender = b.dataset.g;
+    document.querySelectorAll('.gbtn').forEach(x => x.classList.toggle('on', x === b));
+  });
+
+  document.getElementById('saveComplete').onclick = async () => {
+    const phone = document.getElementById('pphone').value.trim().replace(/[\s-]/g, '');
+    const err = document.getElementById('err');
+    const btn = document.getElementById('saveComplete');
+    if(!/^\+?\d{9,15}$/.test(phone)){ err.textContent = 'رقم الهاتف غير صحيح'; return; }
+    if(!gender){ err.textContent = 'يرجى اختيار الجنس'; return; }
+    btn.disabled = true; err.textContent = '';
+    const key = phoneKey(phone);
+    try{
+      const owner = await dbRequest('phones/' + key);
+      if(owner && owner !== p.uid){
+        err.textContent = 'هذا الرقم مسجل بحساب آخر';
+        btn.disabled = false;
+        return;
+      }
+      await dbRequest('phones/' + key, 'PUT', p.uid);
+      await dbRequest('users/' + p.uid + '/phone', 'PUT', phone);
+      await dbRequest('users/' + p.uid + '/gender', 'PUT', gender);
+      setProfile({...p, phone, gender});
+      location.hash = '#/role';
+    }catch(e){
+      err.textContent = 'تعذّر حفظ البيانات، تحقق من الاتصال';
+      btn.disabled = false;
+    }
+  };
+}
+
+/* ===== اختيار الدور ===== */
+function showRole(){
+  stopAll();
+  const p = getProfile();
+  if(!p || !p.uid){ location.hash = '#/start'; return; }
+  app.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 6px">أهلًا ${esc(p.name)} ${genderIcon(p.gender)}</h2>
+      <div class="muted">اختر كيف تريد استخدام التطبيق</div>
+      <button class="btn" id="roleP">🧍 أنا راكب</button>
+      <button class="btn ghost" id="roleD">🚗 أنا سائق</button>
+      <div class="err" id="err"></div>
+    </div>`;
+
+  const setRole = async role => {
+    try{
+      await dbRequest('users/' + p.uid + '/role', 'PUT', role);
+      saveProfileField('role', role);
+      location.hash = role === 'passenger' ? '#/' : '#/driver';
+    }catch(e){
+      document.getElementById('err').textContent = 'تعذّر حفظ الدور، حاول مرة أخرى';
+    }
+  };
+  document.getElementById('roleP').onclick = () => setRole('passenger');
+  document.getElementById('roleD').onclick = () => setRole('driver');
+}
+
+/* ===== الراكب: طلب رحلة ===== */
+function showRequest(){
+  stopAll();
+  const p = getProfile() || {};
+  app.innerHTML = `
+    <div class="card">
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+        <b>أين تريد الذهاب؟</b>
+        <span class="muted" id="cityInfo">جارٍ تحديد موقعك…</span>
+        <button class="link" id="refreshPos">🔄 تحديث الموقع</button>
+      </div>
+      <div id="cityPick" style="display:none">
+        <label for="citySel">اختر مدينتك</label>
+        <select class="sel" id="citySel">${cityOptions(p.city)}</select>
+      </div>
+      <div id="map"></div>
+    </div>
+    <div class="card">
+      <label>نوع الخدمة</label>
+      <div class="svcs">
+        ${SERVICES.map(s => `<button type="button" class="svc ${s.id === draftService ? 'on' : ''}" data-svc="${esc(s.id)}"><span class="ico">${s.icon}</span><span class="t">${esc(s.label)}</span></button>`).join('')}
+      </div>
+      <label for="from">مكان الانطلاق (اختياري)</label>
+      <input id="from" placeholder="مثال: أمام المحطة">
+      <label for="to">الوجهة</label>
+      <input id="to" placeholder="مثال: المطار">
+      <label>السعر المقترح</label>
+      <div class="stepper">
+        <button class="step" id="minus" aria-label="تخفيض">−</button>
+        <div class="amount" id="amt">${draftPrice} <small>${CURRENCY}</small></div>
+        <button class="step" id="plus" aria-label="زيادة">+</button>
+      </div>
+      <div class="err" id="err"></div>
+      <button class="btn" id="go">اطلب الرحلة</button>
+    </div>`;
+
+  document.querySelectorAll('.svc').forEach(b => b.onclick = () => {
+    draftService = b.dataset.svc;
+    document.querySelectorAll('.svc').forEach(x => x.classList.toggle('on', x === b));
+  });
+
+  const amt = document.getElementById('amt');
+  const setPrice = v => {
+    draftPrice = Math.min(MAX_PRICE, Math.max(MIN_PRICE, v));
+    amt.innerHTML = `${draftPrice} <small>${CURRENCY}</small>`;
+  };
+  document.getElementById('minus').onclick = () => setPrice(draftPrice - STEP);
+  document.getElementById('plus').onclick = () => setPrice(draftPrice + STEP);
+
+  let pickup = null, city = null;
+  const cityInfo = document.getElementById('cityInfo');
+  const mapEl = document.getElementById('map');
+
+  const applyLocation = (pos, c, approx = false) => {
+    city = c; pickup = {...pos, approx};
+    saveProfileField('city', c.name);
+    const accTxt = approx
+      ? 'موقع تقريبي (مركز المدينة)'
+      : (pos.acc > 100 ? `⚠️ دقة الموقع ±${pos.acc} م (ضعيفة)` : `دقة الموقع ±${pos.acc} م`);
+    cityInfo.textContent = 'المدينة: ' + c.name + ' · ' + accTxt;
+    drawMap(mapEl, [{lat: pos.lat, lng: pos.lng, label: approx ? 'موقع تقريبي' : 'موقعك', color: '#2563eb'}]);
+  };
+
+  const locate = () => {
+    cityInfo.textContent = 'جارٍ تحديد موقعك بدقة…';
+    getPosPrecise().then(pos => applyLocation(pos, nearestCity(pos))).catch(() => {
+      cityInfo.textContent = 'تعذّر تحديد موقعك بدقة';
+      const sel = document.getElementById('citySel');
+      document.getElementById('cityPick').style.display = 'block';
+      const pick = () => { const c = cityByName(sel.value); applyLocation({lat: c.lat, lng: c.lng}, c, true); };
+      sel.onchange = pick;
+      pick();
+    });
+  };
+  document.getElementById('refreshPos').onclick = locate;
+  locate();
+
+  document.getElementById('go').onclick = async () => {
+    const to = document.getElementById('to').value.trim();
+    const from = document.getElementById('from').value.trim() || 'موقعي الحالي';
+    const err = document.getElementById('err');
+    const btn = document.getElementById('go');
+    if(!to){ err.textContent = 'يرجى تحديد الوجهة'; return; }
+    if(!pickup || !city){ err.textContent = 'جارٍ تحديد موقعك، حاول بعد لحظات'; return; }
+    btn.disabled = true; err.textContent = '';
+    const pr = getProfile() || {};
+    try{
+      const res = await dbRequest('rides', 'POST', {
+        from, to, price: draftPrice, status: 'searching', service: draftService, city: city.name,
+        pickup, pickupAcc: pickup.acc ?? null, pickupApprox: !!pickup.approx,
+        passengerName: pr.name || '', passengerPhone: pr.phone || '', passengerGender: pr.gender || '',
+        passengerUid: pr.uid || '', createdAt: Date.now(), offers: {}
+      });
+      saveRideId(res.name);
+      location.hash = '#/ride/' + res.name;
+    }catch(e){
+      err.textContent = 'تعذّر إرسال الطلب، تحقق من الاتصال';
+      btn.disabled = false;
+    }
+  };
+}
+
+/* ===== الراكب: متابعة الرحلة والعروض والدردشة ===== */
+function showRide(rideId){
+  stopAll();
+  lastOfferCount = 0; chatMsgCount = -1;
+  chatRideId = rideId; chatRole = 'passenger';
+  app.innerHTML = `
+    <div class="card">
+      <div id="rideHead"><div class="empty">جارٍ التحميل…</div></div>
+      <div id="map"></div>
+    </div>
+    <div class="card">
+      <b id="offersTitle">عروض السائقين</b>
+      <div id="offers"></div>
+      <div id="actions"></div>
+    </div>
+    <div id="chatArea"></div>
+    <div class="err" id="err"></div>`;
+
+  const tick = async () => {
+    if(!document.getElementById('rideHead')) return;
+    try{
+      const ride = await dbRequest('rides/' + rideId);
+      if(!ride){
+        stopAll(); saveRideId('');
+        app.innerHTML = `<div class="card"><div class="empty">لم نجد هذه الرحلة</div><a class="btn" href="#/">طلب رحلة جديدة</a></div>`;
+        return;
+      }
+      renderRide(rideId, ride);
+      if((ride.status === 'searching' || ride.status === 'accepted') && Date.now() - lastLocPush >= LOC_MS){
+        lastLocPush = Date.now();
+        getPos().then(pos => dbRequest('rides/' + rideId + '/passengerLoc', 'PUT', {...pos, t: Date.now()})).catch(()=>{});
+      }
+    }catch(e){
+      const el = document.getElementById('err');
+      if(el) el.textContent = 'تعذّر تحديث الرحلة، جارٍ إعادة المحاولة…';
+    }
+  };
+  tick();
+  pollTimer = setInterval(tick, POLL_MS);
+}
+
+function renderRide(rideId, ride){
+  const st = ride.status || 'searching';
+  const accepted = ACTIVE_STATES.includes(st);
+  const finished = st === 'cancelled' || st === 'done';
+  if(finished) saveRideId('');
+
+  const me = ride.passengerLoc || ride.pickup;
+  const dist = accepted && ride.driverLoc && me ? distKm(me, ride.driverLoc) : null;
+  const etaMin = dist !== null ? Math.max(1, Math.round(dist / 25 * 60)) : null;
+
+  document.getElementById('rideHead').innerHTML = `
+    <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+      <span class="status ${esc(st)}">${STATUS_TXT[st] || esc(st)}</span>
+      <b class="oprice" style="margin:0">${esc(ride.price)} ${CURRENCY}</b>
+    </div>
+    <div class="route" style="margin-top:12px">
+      <div><span class="dot"></span>${esc(ride.from)}</div>
+      <div><span class="dot end"></span>${esc(ride.to)}</div>
+    </div>
+    ${dist !== null ? `<div class="muted" style="margin-top:8px">المسافة بينك وبين السائق: ${fmtDist(dist)}</div><span class="eta">⏱ يصل خلال ~${etaMin} دقيقة</span>` : ''}`;
+
+  drawMap(document.getElementById('map'), [
+    me ? {lat: me.lat, lng: me.lng, label: 'أنت', color: '#2563eb'} : null,
+    accepted && ride.driverLoc ? {lat: ride.driverLoc.lat, lng: ride.driverLoc.lng, label: ride.driverName || 'السائق', color: '#0f9d58'} : null
+  ]);
+
+  const offersEl = document.getElementById('offers');
+  const actionsEl = document.getElementById('actions');
+  const titleEl = document.getElementById('offersTitle');
+  const errEl = document.getElementById('err');
+  const chatArea = document.getElementById('chatArea');
+
+  if(accepted){
+    titleEl.textContent = 'السائق في الطريق إليك';
+    offersEl.innerHTML = `
+      <div class="offer" style="border:none;padding:6px 0">
+        <div>
+          <div class="name">${genderIcon(ride.driverGender)} ${esc(ride.driverName || 'السائق')}</div>
+          <div class="meta">${svcIcon(ride.vehicle)} ${esc(ride.car || '')} · 🪑 ${esc(ride.seats || '-')} مقاعد · ${esc(ride.driverPhone || '')}</div>
+        </div>
+        <div class="oprice">${esc(ride.finalPrice)} ${CURRENCY}</div>
+      </div>`;
+    actionsEl.innerHTML = `<button class="btn ghost" id="shareTrip">📤 شارك موقعي مع شخص آخر</button>`;
+    document.getElementById('shareTrip').onclick = () => {
+      const spot = ride.passengerLoc || ride.pickup;
+      const url = spot ? mapsUrl(spot.lat, spot.lng) : location.href;
+      const text = `رحلتي مع ${ride.driverName || 'السائق'} إلى ${ride.to}`;
+      if(navigator.share){ navigator.share({title: 'رحلة', text, url}).catch(() => {}); }
+      else { try{ navigator.clipboard.writeText(url); toast('تم نسخ الرابط'); }catch(e){ toast(url); } }
+    };
+    if(!document.getElementById('chatCard')){ chatArea.innerHTML = chatCardHTML(); bindChatForm(); }
+    renderChat(ride);
+  }else if(finished){
+    titleEl.textContent = '';
+    offersEl.innerHTML = '';
+    chatArea.innerHTML = '';
+    const rated = (() => { try{ return localStorage.getItem('rated_' + rideId); }catch(e){ return null; } })();
+    actionsEl.innerHTML = (st === 'done' && !rated && ride.driverPhone)
+      ? `<div class="card" style="margin:0 0 10px;text-align:center"><b>كيف كانت الرحلة مع ${esc(ride.driverName || 'السائق')}؟</b>
+           <div class="row" style="justify-content:center;margin-top:8px">${[1,2,3,4,5].map(n => `<button class="link star" data-st="${n}" style="font-size:1.8rem;text-decoration:none">⭐</button>`).join('')}</div>
+         </div>`
+      : '';
+    actionsEl.innerHTML += `<a class="btn" href="#/">طلب رحلة جديدة</a>`;
+    actionsEl.querySelectorAll('.star').forEach(b => b.onclick = async () => {
+      try{
+        await dbRequest('users/' + phoneKey(ride.driverPhone) + '/ratings', 'POST', {stars: Number(b.dataset.st), rideId, t: Date.now()});
+        try{ localStorage.setItem('rated_' + rideId, '1'); }catch(e){}
+        toast('شكرًا على تقييمك ⭐');
+        actionsEl.querySelectorAll('.card').forEach(c => c.remove());
+      }catch(e){ toast('تعذّر إرسال التقييم'); }
+    });
+  }else{
+    titleEl.textContent = 'عروض السائقين';
+    chatArea.innerHTML = '';
+    const offers = ride.offers ? Object.entries(ride.offers) : [];
+    if(offers.length > lastOfferCount){ toast('🔔 وصلك عرض جديد من سائق'); buzz(); }
+    lastOfferCount = offers.length;
+
+    offersEl.innerHTML = offers.length ? offers.map(([oid, o]) => `
+      <div class="offer">
+        <div>
+          <div class="name">${genderIcon(o.driverGender)} ${esc(o.driverName || 'سائق')}</div>
+          <div class="meta">${svcIcon(o.vehicle)} ${esc(o.car || '')} · 🪑 ${esc(o.seats || '-')} مقاعد</div>
+          <div class="oprice">${esc(o.price)} ${CURRENCY}</div>
+        </div>
+        <button class="acc" data-oid="${esc(oid)}" data-price="${esc(o.price)}" data-name="${esc(o.driverName || '')}" data-phone="${esc(o.driverPhone || '')}" data-car="${esc(o.car || '')}" data-seats="${esc(o.seats || '')}" data-vehicle="${esc(o.vehicle || '')}" data-gender="${esc(o.driverGender || '')}">قبول</button>
+      </div>`).join('') : `<div class="empty">لا توجد عروض بعد <span class="pulse"></span></div>`;
+
+    actionsEl.innerHTML = `<button class="btn danger" id="cancel">إلغاء الطلب</button>`;
+
+    offersEl.querySelectorAll('button[data-oid]').forEach(b => {
+      b.onclick = async () => {
+        b.disabled = true;
+        try{
+          await dbRequest('rides/' + rideId, 'PATCH', {
+            status: 'accepted', driverName: b.dataset.name, driverPhone: b.dataset.phone,
+            car: b.dataset.car, seats: b.dataset.seats, vehicle: b.dataset.vehicle, driverGender: b.dataset.gender,
+            finalPrice: Number(b.dataset.price), acceptedOffer: b.dataset.oid
+          });
+        }catch(e){
+          errEl.textContent = 'تعذّر قبول العرض، حاول مرة أخرى';
+          b.disabled = false;
+        }
+      };
+    });
+    document.getElementById('cancel').onclick = async () => {
+      try{ await dbRequest('rides/' + rideId, 'PATCH', {status: 'cancelled'}); }catch(e){}
+    };
+  }
+}
+
+/* ===== السائق ===== */
+function showDriver(){
+  stopAll();
+  const p = getProfile() || {};
+  app.innerHTML = `
+    <div class="card">
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+        <div>
+          <h2 style="margin:0">مرحبًا ${esc(p.name || '')} ${genderIcon(p.gender)}</h2>
+          <div class="muted" id="drvCity">المدينة: ${esc(p.city || 'جارٍ التحديد…')}</div>
+        </div>
+        <div class="row"><button class="link" id="toggleOnline"></button><button class="link" id="changeRole">تغيير الدور</button></div>
+      </div>
+      <div class="grid2">
+        <div>
+          <label for="drvCitySel">مدينتك</label>
+          <select class="sel" id="drvCitySel">${cityOptions(p.city)}</select>
+        </div>
+        <div>
+          <label for="vehSel">المركبة</label>
+          <select class="sel" id="vehSel">${SERVICES.map(s => `<option ${s.id === (p.vehicle || 'سيارة') ? 'selected' : ''}>${esc(s.id)}</option>`).join('')}</select>
+        </div>
+        <div>
+          <label for="seats">عدد المقاعد</label>
+          <input id="seats" type="number" min="1" max="8" value="${esc(p.seats || 4)}">
+        </div>
+        <div>
+          <label for="carName">الموديل</label>
+          <input id="carName" placeholder="مثال: Dacia Logan" value="${esc(p.car || '')}">
+        </div>
+      </div>
+    </div>
+    <div id="active" data-rid=""></div>
+    <div class="card" id="listCard">
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+        <span class="muted" id="radiusInfo"></span>
+        <button class="link" id="toggleAll">عرض كل طلبات المدينة</button>
+      </div>
+      <div id="mapInfo"></div>
+      <div id="driverList"></div>
+      <div class="err" id="err"></div>
+    </div>`;
+
+  document.getElementById('drvCitySel').onchange = e => {
+    saveProfileField('city', e.target.value);
+    document.getElementById('drvCity').textContent = 'المدينة: ' + e.target.value;
+    tick();
+  };
+  document.getElementById('vehSel').onchange = e => { saveProfileField('vehicle', e.target.value); tick(); };
+  document.getElementById('seats').onchange = e => {
+    const n = Math.min(8, Math.max(1, parseInt(e.target.value, 10) || 4));
+    e.target.value = n; saveProfileField('seats', n);
+  };
+  document.getElementById('carName').onchange = e => saveProfileField('car', e.target.value.trim());
+
+  const paintOnline = () => {
+    const on = !!(getProfile() || {}).online;
+    const b = document.getElementById('toggleOnline');
+    b.textContent = on ? '🟢 متصل' : '⚪ غير متصل';
+    b.style.color = on ? 'var(--ok)' : 'var(--muted)';
+  };
+  document.getElementById('toggleOnline').onclick = () => {
+    const pr = getProfile() || {}; pr.online = !pr.online; setProfile(pr);
+    paintOnline(); tick();
+  };
+  paintOnline();
+
+  document.getElementById('toggleAll').onclick = () => {
+    showAllCity = !showAllCity;
+    document.getElementById('toggleAll').textContent = showAllCity ? 'عرض الطلبات القريبة فقط' : 'عرض كل طلبات المدينة';
+    tick();
+  };
+  document.getElementById('changeRole').onclick = async () => {
+    stopAll();
+    try{ await dbRequest('users/' + p.uid + '/role', 'PUT', null); }catch(e){}
+    saveProfileField('role', null);
+    location.hash = '#/role';
+  };
+
+  const tick = async () => {
+    if(!document.getElementById('active')) return;
+    const me = getProfile() || {};
+    const activeEl = document.getElementById('active');
+    const listCard = document.getElementById('listCard');
+    const listEl = document.getElementById('driverList');
+    const mapInfo = document.getElementById('mapInfo');
+    const errEl = document.getElementById('err');
+    try{
+      try{ lastDriverPos = await getPos(); }catch(e){}
+      if(!document.getElementById('active')) return;
+
+      const rides = (await dbRequest('rides')) || {};
+      const entries = Object.entries(rides).filter(([, r]) => r);
+      const mine = entries.find(([, r]) => ACTIVE_STATES.includes(r.status) && r.driverPhone === me.phone);
+
+      if(mine){
+        const [rid, r] = mine;
+        listCard.style.display = 'none';
+        if(driverNotifiedRide !== rid){ driverNotifiedRide = rid; toast('✅ الراكب قبل عرضك، توجّه إليه'); buzz(); }
+        if(activeEl.dataset.rid !== rid){
+          activeEl.dataset.rid = rid;
+          activeEl.innerHTML = `<div class="card" id="activeInfo"></div>${chatCardHTML()}`;
+          bindChatForm();
+          chatMsgCount = -1;
+        }
+        chatRideId = rid; chatRole = 'driver';
+
+        const pax = r.passengerLoc || r.pickup;
+        const paxDist = lastDriverPos && pax ? fmtDist(distKm(lastDriverPos, pax)) : '';
+        document.getElementById('activeInfo').innerHTML = `
+          <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+            <span class="status accepted">${STATUS_TXT[r.status] || 'رحلة جارية'}</span>
+            <b class="oprice" style="margin:0">${esc(r.finalPrice)} ${CURRENCY}</b>
+          </div>
+          <div class="route" style="margin-top:12px">
+            <div><span class="dot"></span>الراكب: ${genderIcon(r.passengerGender)} ${esc(r.passengerName || '')} ${esc(r.passengerPhone || '')}</div>
+            <div><span class="dot end"></span>${esc(r.to)}</div>
+          </div>
+          ${paxDist ? `<div class="muted" style="margin-top:8px">الراكب يبعد عنك ${paxDist}</div>` : ''}
+          <div class="row" style="margin-top:6px">
+            <a class="btn" style="margin-top:0" target="_blank" rel="noopener" href="${navLink(r)}">فتح الملاحة</a>
+            <button class="btn ghost" id="nextState" style="margin-top:0">${NEXT[r.status] ? NEXT[r.status].label : 'إنهاء الرحلة'}</button>
+          </div>`;
+        document.getElementById('nextState').onclick = async () => {
+          const nx = NEXT[r.status];
+          if(!nx) return;
+          try{ await dbRequest('rides/' + rid, 'PATCH', {status: nx.to}); }
+          catch(e){ toast('تعذّر تحديث الحالة'); }
+        };
+        renderChat(r);
+
+        if(lastDriverPos && Date.now() - lastLocPush >= LOC_MS){
+          lastLocPush = Date.now();
+          dbRequest('rides/' + rid + '/driverLoc', 'PUT', {...lastDriverPos, t: Date.now()}).catch(()=>{});
+        }
+        drawMap(document.getElementById('map'), [
+          lastDriverPos ? {...lastDriverPos, label: 'موقعك', color: '#0f9d58'} : null,
+          pax ? {lat: pax.lat, lng: pax.lng, label: 'الراكب', color: '#2563eb'} : null
+        ]);
+        return;
+      }
+
+      // لا توجد رحلة جارية: عرض الطلبات مرتبة حسب القرب
+      activeEl.innerHTML = '';
+      activeEl.dataset.rid = '';
+      chatRideId = null;
+      listCard.style.display = '';
+
+      const vehicle = me.vehicle || 'سيارة';
+      const open = entries.filter(([, r]) => r.status === 'searching' && r.city === me.city && (r.service || 'سيارة') === vehicle);
+      const distOf = ([, r]) => (lastDriverPos && r.pickup) ? distKm(lastDriverPos, r.pickup) : Infinity;
+      const near = (me.online ? open : [])
+        .filter(item => showAllCity || !lastDriverPos || distOf(item) <= PICKUP_RADIUS_KM)
+        .sort((a, b) => distOf(a) - distOf(b));
+
+      document.getElementById('radiusInfo').textContent = !me.online
+        ? 'أنت غير متصل، فعّل الاتصال لرؤية الطلبات'
+        : (!lastDriverPos
+          ? 'فعّل الموقع لنحسب المسافة بينك وبين كل طلب'
+          : (showAllCity ? `كل طلبات ${me.city || 'مدينتك'} (${near.length})` : `الطلبات ضمن ${PICKUP_RADIUS_KM} كم منك (${near.length})`));
+
+      if(!me.online){
+        listEl.innerHTML = `<div class="empty">غير متصل الآن</div>`;
+      }else if(!near.length){
+        listEl.innerHTML = `<div class="empty">لا توجد طلبات ${showAllCity ? 'في مدينتك' : 'قريبة منك'} الآن <span class="pulse"></span></div>`;
+      }else{
+        listEl.innerHTML = near.map(item => {
+          const [id, r] = item;
+          const sent = r.offers && Object.values(r.offers).some(o => o.driverPhone === me.phone);
+          const d = distOf(item);
+          const distTxt = d === Infinity ? 'المسافة غير معروفة' : fmtDist(d);
+          const badge = d <= PICKUP_RADIUS_KM ? 'badge near' : 'badge';
+          return `
+            <div class="reqitem">
+              <div class="reqtop">
+                <div>
+                  <div class="name" style="font-weight:800">${genderIcon(r.passengerGender)} ${svcIcon(r.service)} ${esc(r.from)} → ${esc(r.to)}</div>
+                  <div class="muted">${esc(r.price)} ${CURRENCY} مقترح</div>
+                </div>
+                <span class="${badge}">📍 ${distTxt}${r.pickupApprox ? ' · تقريبي' : ''}</span>
+              </div>
+              ${sent
+                ? `<div class="status accepted" style="align-self:flex-start">تم إرسال عرضك ✓</div>`
+                : `<div class="row">
+                     <input type="number" min="${MIN_PRICE}" max="${MAX_PRICE}" step="${STEP}" value="${esc(r.price)}" data-ride="${esc(id)}" style="flex:1">
+                     <button class="send" data-send="${esc(id)}">أرسل عرضًا</button>
+                   </div>`}
+            </div>`;
+        }).join('');
+
+        listEl.querySelectorAll('button[data-send]').forEach(b => {
+          b.onclick = async () => {
+            const rid = b.dataset.send;
+            const price = Number(listEl.querySelector(`input[data-ride="${rid}"]`).value);
+            if(!price || price < MIN_PRICE || price > MAX_PRICE){ errEl.textContent = 'السعر غير صالح'; return; }
+            b.disabled = true; errEl.textContent = '';
+            try{
+              await dbRequest('rides/' + rid + '/offers', 'POST', {
+                driverName: me.name, driverPhone: me.phone, driverGender: me.gender || '',
+                car: me.car || '', seats: me.seats || 4, vehicle,
+                rating: 5, price, createdAt: Date.now()
+              });
+              tick();
+            }catch(e){
+              errEl.textContent = 'تعذّر إرسال العرض، حاول مرة أخرى';
+              b.disabled = false;
+            }
+          };
+        });
+      }
+
+      if(lastOpenCount >= 0 && near.length > lastOpenCount){ toast('🚨 طلب جديد في مدينتك'); buzz(); }
+      lastOpenCount = near.length;
+
+      // الخريطة: موقعك وأقرب 5 طلبات
+      const nearest = near.slice(0, 5).map(([, r]) => r.pickup ? {lat: r.pickup.lat, lng: r.pickup.lng, label: r.from || 'طلب', color: '#ff6a13'} : null);
+      mapInfo.innerHTML = '<div id="map"></div>';
+      drawMap(document.getElementById('map'), [lastDriverPos ? {...lastDriverPos, label: 'موقعك', color: '#0f9d58'} : null, ...nearest]);
+    }catch(e){
+      const el = document.getElementById('err');
+      if(el) el.textContent = 'تعذّر تحميل الطلبات، جارٍ إعادة المحاولة…';
+    }
+  };
+
+  if(!p.city){
+    getPos().then(pos => {
+      const c = nearestCity(pos);
+      saveProfileField('city', c.name);
+      document.getElementById('drvCitySel').value = c.name;
+      document.getElementById('drvCity').textContent = 'المدينة: ' + c.name;
+      tick();
+    }).catch(() => {
+      document.getElementById('drvCity').textContent = 'اختر مدينتك من القائمة';
+    });
+  }
+
+  tick();
+  pollTimer = setInterval(tick, POLL_MS);
+}
+
+/* ===== التوجيه ===== */
+function route(){
+  const h = location.hash.replace(/^#/, '');
+  const p = getProfile();
+  window.scrollTo(0, 0);
+  document.getElementById('logoutBtn').style.display = p ? '' : 'none';
+
+  if(!p || !p.uid || h === '/start'){ showOnboarding(); return; }
+  if(!p.phone || !p.gender){ showComplete(); return; }
+  if(!p.role || h === '/role'){ showRole(); return; }
+  if(p.role === 'driver'){ showDriver(); return; }
+
+  const m = h.match(/^\/ride\/([\w-]+)$/);
+  if(m){ saveRideId(m[1]); showRide(m[1]); return; }
+
+  const active = savedRideId();
+  if(active && !h){ location.hash = '#/ride/' + active; return; }
+  showRequest();
+}
+
+document.getElementById('logoutBtn').onclick = logout;
+window.addEventListener('hashchange', route);
+(async () => {
+  await handleRedirect();
+  route();
+})();
+</script>
+</body>
+</html>
