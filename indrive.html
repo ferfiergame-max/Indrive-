@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>تطبيق النقل</title>
+<title>indriv taxi</title>
 <style>
 :root{--bg:#fff6ef;--card:#ffffff;--ink:#1f1f1f;--muted:#7a6f66;--accent:#ff6a13;--accent-ink:#ffffff;--ok:#0f9d58;--bad:#e11d48;--line:#f1e4da;--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 22px rgba(255,106,19,.10);--r:18px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#140d09;--card:#1f1611;--ink:#f5ece6;--muted:#b8a89c;--line:#3a2a20;--shadow:0 8px 22px rgba(0,0,0,.35)}}
@@ -87,7 +87,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 <body>
 <header>
   <div class="hrow">
-    <div class="brand">🚕 تطبيق النقل</div>
+    <div class="brand">🚕 indriv taxi</div>
     <button class="link" id="logoutBtn" style="color:#fff;display:none">خروج</button>
   </div>
 </header>
@@ -784,11 +784,27 @@ function renderRide(rideId, ride){
           <div class="meta">${svcIcon(o.vehicle)} ${esc(o.car || '')} · 🪑 ${esc(o.seats || '-')} مقاعد</div>
           <div class="oprice">${esc(o.price)} ${CURRENCY}</div>
         </div>
-        <button class="acc" data-oid="${esc(oid)}" data-price="${esc(o.price)}" data-name="${esc(o.driverName || '')}" data-phone="${esc(o.driverPhone || '')}" data-car="${esc(o.car || '')}" data-seats="${esc(o.seats || '')}" data-vehicle="${esc(o.vehicle || '')}" data-gender="${esc(o.driverGender || '')}">قبول</button>
+        ${o.lastBy === 'passenger'
+          ? '<div class="meta">بانتظار رد السائق على اقتراحك</div>'
+          : `<button class="acc" data-oid="${esc(oid)}" data-price="${esc(o.price)}" data-name="${esc(o.driverName || '')}" data-phone="${esc(o.driverPhone || '')}" data-car="${esc(o.car || '')}" data-seats="${esc(o.seats || '')}" data-vehicle="${esc(o.vehicle || '')}" data-gender="${esc(o.driverGender || '')}">قبول</button>`}
+      </div>
+      <div class="row" style="margin:-4px 0 4px">
+        <input type="number" min="${MIN_PRICE}" max="${MAX_PRICE}" step="${STEP}" placeholder="اقترح سعرًا" data-cin="${esc(oid)}" style="flex:1">
+        <button class="send" data-counter="${esc(oid)}">أرسل</button>
       </div>`).join('') : `<div class="empty">لا توجد عروض بعد <span class="pulse"></span></div>`;
 
     actionsEl.innerHTML = `<button class="btn danger" id="cancel">إلغاء الطلب</button>`;
 
+    offersEl.querySelectorAll('button[data-counter]').forEach(b => {
+      b.onclick = async () => {
+        const oid = b.dataset.counter;
+        const price = Number(offersEl.querySelector(`input[data-cin="${oid}"]`).value);
+        if(!price || price < MIN_PRICE || price > MAX_PRICE){ errEl.textContent = 'السعر غير صالح'; return; }
+        b.disabled = true; errEl.textContent = '';
+        try{ await dbRequest(`rides/${rideId}/offers/${oid}`, 'PATCH', {price, lastBy: 'passenger'}); }
+        catch(e){ errEl.textContent = 'تعذّر إرسال الاقتراح'; b.disabled = false; }
+      };
+    });
     offersEl.querySelectorAll('button[data-oid]').forEach(b => {
       b.onclick = async () => {
         b.disabled = true;
@@ -978,7 +994,8 @@ function showDriver(){
       }else{
         listEl.innerHTML = near.map(item => {
           const [id, r] = item;
-          const sent = r.offers && Object.values(r.offers).some(o => o.driverPhone === me.phone);
+          const myEntry = r.offers ? Object.entries(r.offers).find(([, o]) => o.driverPhone === me.phone) : null;
+          const sent = !!myEntry;
           const d = distOf(item);
           const distTxt = d === Infinity ? 'المسافة غير معروفة' : fmtDist(d);
           const badge = d <= PICKUP_RADIUS_KM ? 'badge near' : 'badge';
@@ -992,7 +1009,8 @@ function showDriver(){
                 <span class="${badge}">📍 ${distTxt}${r.pickupApprox ? ' · تقريبي' : ''}</span>
               </div>
               ${sent
-                ? `<div class="status accepted" style="align-self:flex-start">تم إرسال عرضك ✓</div>`
+                ? `<div class="muted">${myEntry[1].lastBy === 'passenger' ? 'الراكب اقترح ' + esc(myEntry[1].price) + ' ' + CURRENCY : 'عرضك الحالي: ' + esc(myEntry[1].price) + ' ' + CURRENCY}</div>
+                   <div class="row"><input type="number" min="${MIN_PRICE}" max="${MAX_PRICE}" step="${STEP}" value="${esc(myEntry[1].price)}" data-dcin="${esc(myEntry[0])}" style="flex:1"><button class="send" data-dcounter="${esc(myEntry[0])}" data-rid="${esc(id)}">أرسل</button></div>`
                 : `<div class="row">
                      <input type="number" min="${MIN_PRICE}" max="${MAX_PRICE}" step="${STEP}" value="${esc(r.price)}" data-ride="${esc(id)}" style="flex:1">
                      <button class="send" data-send="${esc(id)}">أرسل عرضًا</button>
@@ -1000,6 +1018,21 @@ function showDriver(){
             </div>`;
         }).join('');
 
+        listEl.querySelectorAll('button[data-dcounter]').forEach(b => {
+          b.onclick = async () => {
+            const oid = b.dataset.dcounter, rid = b.dataset.rid;
+            const price = Number(listEl.querySelector(`input[data-dcin="${oid}"]`).value);
+            if(!price || price < MIN_PRICE || price > MAX_PRICE){ errEl.textContent = 'السعر غير صالح'; return; }
+            b.disabled = true; errEl.textContent = '';
+            try{
+              await dbRequest(`rides/${rid}/offers/${oid}`, 'PATCH', {price, lastBy: 'driver'});
+              tick();
+            }catch(e){
+              errEl.textContent = 'تعذّر إرسال السعر';
+              b.disabled = false;
+            }
+          };
+        });
         listEl.querySelectorAll('button[data-send]').forEach(b => {
           b.onclick = async () => {
             const rid = b.dataset.send;
