@@ -220,7 +220,10 @@ const phoneEmail = key => `p${key}@${PHONE_EMAIL_DOMAIN}`;
 
 async function dbRequest(path, method = 'GET', body){
   const hasBody = body !== undefined;
-  const res = await fetch(`${DB}/${path}.json`, {
+  let token = '';
+  try{ if(auth && auth.currentUser) token = await auth.currentUser.getIdToken(); }catch(e){}
+  const q = token ? `?auth=${encodeURIComponent(token)}` : '';
+  const res = await fetch(`${DB}/${path}.json${q}`, {
     method,
     headers: hasBody ? {'Content-Type':'application/json'} : undefined,
     body: hasBody ? JSON.stringify(body) : undefined
@@ -379,9 +382,13 @@ function authErrorText(code){
     'auth/email-already-in-use': 'هذا الرقم مسجل مسبقًا، سجّل الدخول',
     'auth/weak-password': 'كلمة المرور ضعيفة، استخدم 6 أحرف على الأقل',
     'auth/operation-not-allowed': 'طريقة الدخول بالهاتف غير مفعّلة في Firebase',
-    'auth/too-many-requests': 'محاولات كثيرة، انتظر قليلًا ثم حاول مرة أخرى'
+    'auth/too-many-requests': 'محاولات كثيرة، انتظر قليلًا ثم حاول مرة أخرى',
+    'auth/unauthorized-domain': 'هذا الموقع غير مُعتمد في Firebase. افتح الرابط مباشرة من GitHub Pages وليس من داخل صفحة أخرى',
+    'auth/network-request-failed': 'تعذّر الاتصال بالإنترنت، تحقق من الشبكة',
+    'auth/invalid-api-key': 'مفتاح Firebase غير صحيح',
+    'auth/user-disabled': 'هذا الحساب موقوف'
   };
-  return map[code] || 'تعذّر تسجيل الدخول، تحقق من الاتصال';
+  return map[code] || ('تعذّر تسجيل الدخول (' + (code || 'unknown') + ')');
 }
 
 function showOnboarding(){
